@@ -195,6 +195,11 @@ body.topbar-modal-open {
     <span class="topbar-pill-dot"></span>
     <span class="topbar-pill-label">FINANCE</span>
   </a>
+  <a href="nutrilog.html" class="topbar-pill" id="topbarNutri">
+    <span class="topbar-pill-dot" style="background:#22C55E"></span>
+    <span class="topbar-pill-label">NUTRITION</span>
+    <span class="topbar-pill-count" id="topbarNutriCount">—</span>
+  </a>
 </header>
 `;
 
@@ -305,6 +310,23 @@ body.topbar-modal-open {
       s.total ? s.done + '/' + s.total : '0/0';
     document.getElementById('topbarWaterCount').textContent =
       w.total ? w.done + '/' + w.total : '0/0';
+
+    // NutriLog kcal count
+    const nutriCountEl = document.getElementById('topbarNutriCount');
+    if (nutriCountEl) {
+      try {
+        const todayKey = calendarDateKey();
+        const allLogs = JSON.parse(localStorage.getItem('nl_logs') || '{}');
+        const todayLogs = allLogs[todayKey] || [];
+        const kcal = todayLogs.reduce(function(s, e) { return s + (e.calories || 0); }, 0);
+        const profile = JSON.parse(localStorage.getItem('nl_profile') || 'null');
+        if (profile && profile.calorie_target) {
+          nutriCountEl.textContent = kcal + '/' + profile.calorie_target;
+        } else {
+          nutriCountEl.textContent = kcal > 0 ? kcal + ' kcal' : '—';
+        }
+      } catch (e) { nutriCountEl.textContent = '—'; }
+    }
 
     setPillStatus(goalsEl, classifyStatus(g.done, g.total));
     setPillStatus(stackEl, classifyStatus(s.done, s.total));
